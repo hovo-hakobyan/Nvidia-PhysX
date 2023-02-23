@@ -49,6 +49,7 @@ void PhysXTestScene::Initialize()
 	//Toevoegen aan game object --> voor als je wil renderen
 	//Omda we da nie doen moeten we zelf toevoegen aan physx scene
 	m_pPhysxScene->addActor(*pGroundActor);
+	
 }
 
 

@@ -52,6 +52,7 @@ void TestScene::Update()
 	m_pBox->RotateDegrees(0.f, 90.f * totalTime, 0.f);
 
 	XMFLOAT3 translation{};
+
 	const float movementSpeed{ 10.f * m_SceneContext.GetGameTime()->GetElapsed() };
 
 	if (m_SceneContext.GetInput()->IsActionTriggered(InputIds::Left))
@@ -72,7 +73,9 @@ void TestScene::Update()
 	}
 
 	
-	//There are 2 types of vectors in DX, check it out
+	//First we load the unaligned vectors into aligned vectors (otherwise can't do math operations)
+	//Then we use the XMVectorAdd to + 2 algined vectors
+	//Then we store the aligned result back into unaligned vector
 	XMStoreFloat3(&translation, XMVectorAdd(XMLoadFloat3(&translation),XMLoadFloat3(&m_pBox->GetPosition())));
 	m_pBox->Translate(translation.x, translation.y, translation.z);
 
