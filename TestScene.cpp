@@ -40,9 +40,9 @@ void TestScene::Initialize()
 
 	//INPUT
 	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Down, InputTriggerState::down,VK_DOWN,-1,XINPUT_GAMEPAD_DPAD_DOWN});
-	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Up, InputTriggerState::down,VK_UP,-1,XINPUT_GAMEPAD_DPAD_DOWN });
-	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Left, InputTriggerState::down,VK_LEFT,-1,XINPUT_GAMEPAD_DPAD_DOWN });
-	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Right, InputTriggerState::down,VK_RIGHT,-1,XINPUT_GAMEPAD_DPAD_DOWN });
+	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Up, InputTriggerState::down,VK_UP,-1,XINPUT_GAMEPAD_DPAD_UP });
+	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Left, InputTriggerState::down,VK_LEFT,-1,XINPUT_GAMEPAD_DPAD_LEFT });
+	m_SceneContext.GetInput()->AddInputAction(InputAction{ InputIds::Right, InputTriggerState::down,VK_RIGHT,-1,XINPUT_GAMEPAD_DPAD_RIGHT });
 
 }
 
