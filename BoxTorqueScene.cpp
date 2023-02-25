@@ -64,29 +64,31 @@ void BoxTorqueScene::Update()
 	}
 
 	const float deltaTime = m_SceneContext.GetGameTime()->GetElapsed();
-	float speed{ 50.f * deltaTime };
+	float force{ 500.f * deltaTime };
 
-	//Takes z axis vector and rotates it to match the forward vector of the cube, using quaternion
-	PxVec3 forward = m_pActor->getGlobalPose().q.rotate(PxVec3{ 0.f,0.f,1.f });
-	PxVec3 right = m_pActor->getGlobalPose().q.rotate(PxVec3{ 1.f,0.f,0.f });
+	PxForceMode::Enum forceMode = PxForceMode::eFORCE;
 
-	PxForceMode::Enum forceMode = PxForceMode::eVELOCITY_CHANGE;
+	// Define the torque vectors for each direction
+	const PxVec3 torqueRight = PxVec3{0.f,0.f,-1.f};
+	const PxVec3 torqueLeft = PxVec3{ 0.f,0.f,1.f };
+	const PxVec3 torqueForw = PxVec3{ 1.f,0.f,0.f  };
+	const PxVec3 torqueBackw = PxVec3{ -1.f,0.f,0.f};
 
 	if (m_SceneContext.GetInput()->IsActionTriggered(InputIds::Left))
 	{
-		m_pActor->addForce(-right * speed, forceMode);
+		m_pActor->addTorque(torqueLeft * force, forceMode);
 	}
 	if (m_SceneContext.GetInput()->IsActionTriggered(InputIds::Right))
 	{
-		m_pActor->addForce(right * speed, forceMode);
+		m_pActor->addTorque(torqueRight * force, forceMode);
 	}
 	if (m_SceneContext.GetInput()->IsActionTriggered(InputIds::Forw))
 	{
-		m_pActor->addForce(forward * speed, forceMode);
+		m_pActor->addTorque(torqueForw * force, forceMode);
 	}
 	if (m_SceneContext.GetInput()->IsActionTriggered(InputIds::Back))
 	{
-		m_pActor->addForce(-forward * speed, forceMode);
+		m_pActor->addTorque(torqueBackw * force, forceMode);
 	}
 }
 
