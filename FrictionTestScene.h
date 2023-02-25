@@ -19,6 +19,4 @@ protected:
 
 private:
 
-	PxRigidStatic* m_pGroundPlane{ nullptr };
-	std::vector<GameObject*> m_Spheres{ 3 };
 };
