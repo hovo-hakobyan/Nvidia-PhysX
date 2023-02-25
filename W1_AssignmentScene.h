@@ -20,5 +20,18 @@ protected:
 	void OnSceneDeactivated() override;
 
 private:
+	GameObject* m_pSphere;
+	PxRigidDynamic* m_pSphereActor;
 
+	const int m_NrCubesWidth{ 10 };
+	const int m_NrCubesHeight{ 10 };
+
+	const XMFLOAT3 m_BrickDimensions{ 2.f,2.f,2.f };
+	const XMFLOAT3 m_WallStartPos{ 0.f,0.f,0.f };
+	const float m_HeightToDropWall{ .5f };
+	const float m_DistanceBetweenWallCol{ 1.2f };
+
+	std::vector<GameObject*> m_Bricks;
+
+	void ResetScene();
 };
