@@ -14,6 +14,7 @@
 #include "PhysXTestScene.h"
 #include "BouncingBallScene.h"
 #include "FrictionTestScene.h"
+#include "BoxForceScene.h"
 #endif
 
 #ifdef W02
@@ -26,6 +27,7 @@ namespace dae
 	{
 
 #ifdef W01
+		pSceneManager->AddGameScene(new BoxForceScene());
 		pSceneManager->AddGameScene(new FrictionTestScene());
 		pSceneManager->AddGameScene(new TestScene());
 		pSceneManager->AddGameScene(new PhysXTestScene());

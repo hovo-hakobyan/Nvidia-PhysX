@@ -18,5 +18,8 @@ protected:
 	void OnSceneDeactivated() override;
 
 private:
+	GameObject* m_pCube{ nullptr };
+	PxRigidDynamic* m_pActor{ nullptr };
 
+	void Reset();
 };
