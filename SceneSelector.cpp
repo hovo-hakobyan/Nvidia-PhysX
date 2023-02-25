@@ -16,6 +16,7 @@
 #include "FrictionTestScene.h"
 #include "BoxForceScene.h"
 #include "BoxTorqueScene.h"
+#include "W1_AssignmentScene.h"
 #endif
 
 #ifdef W02
@@ -28,6 +29,7 @@ namespace dae
 	{
 
 #ifdef W01
+		pSceneManager->AddGameScene(new W1_AssignmentScene());
 		pSceneManager->AddGameScene(new BoxTorqueScene());
 		pSceneManager->AddGameScene(new BoxForceScene());
 		pSceneManager->AddGameScene(new FrictionTestScene());
