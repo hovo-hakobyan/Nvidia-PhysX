@@ -21,5 +21,24 @@ protected:
 	virtual void onTrigger(PxTriggerPair* pairs, PxU32 count) override;
 
 private:
+	GameObject* m_pLevel{ nullptr };
+	GameObject* m_pRedBox{ nullptr };
+	GameObject* m_pBlueBox{ nullptr };
+	GameObject* m_pTriggerBoxRed{ nullptr };
+	GameObject* m_pTriggerBoxBlue{ nullptr };
 
+	GameObject* m_pSphere;
+	PxRigidDynamic* m_pSphereActor;
+
+	PxRigidStatic* m_pTriggerActorRed;
+	PxRigidStatic* m_pTriggerActorBlue;
+
+	bool m_isBlueTrigger{ false };
+	bool m_isRedTrigger{ false };
+
+	FMOD::Channel* m_pChannel2D{ nullptr };
+	FMOD::Sound* m_pBellSound{ nullptr };
+
+	GameObject* m_pBlueHatch{ nullptr };
+	GameObject* m_pRedHatch{ nullptr };
 };
