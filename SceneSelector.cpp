@@ -23,6 +23,7 @@
 #include "PhysXMeshTestScene.h"
 #include "TriggerTestScene.h"
 #include "AudioTestScene.h"
+#include "W2_Assignment.h"
 #endif
 
 namespace dae
@@ -42,6 +43,7 @@ namespace dae
 #endif
 
 #ifdef W02
+		pSceneManager->AddGameScene(new W2_Assignment());
 		pSceneManager->AddGameScene(new AudioTestScene());
 		pSceneManager->AddGameScene(new TriggerTestScene());
 		pSceneManager->AddGameScene(new PhysXMeshTestScene());
