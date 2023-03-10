@@ -19,6 +19,8 @@ enum InputIds
 void W2_Assignment::Initialize()
 {
 	EnablePhysxDebugRendering(true);
+	m_pPhysxScene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LOCAL_FRAMES, 1.f);
+	m_pPhysxScene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LIMITS, 1.f);
 
 	const auto pPhysX = PhysxManager::GetInstance()->GetPhysics();
 
@@ -75,13 +77,13 @@ void W2_Assignment::Initialize()
 	m_pBlueBox->Translate(-4.f, 7.f, 0.f);
 
 	//*** Hatches **/
-	const XMFLOAT3 hatchSize{ 2.5f,0.3f,5.f };
+	const XMFLOAT3 hatchSize{ 2.2f,0.3f,5.f };
 	PxBoxGeometry hatchGeo = PxBoxGeometry{ hatchSize.x / 2.f, hatchSize.y / 2.f, hatchSize.z / 2.f };
 	//Blue
 	m_pBlueHatch = new CubePosColorNorm(hatchSize.x, hatchSize.y, hatchSize.z, XMFLOAT4{ Colors::Blue });
 	AddGameObject(m_pBlueHatch);
 	auto pBlueHatchActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity });
-	pBlueHatchActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	//pBlueHatchActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	PxRigidActorExt::createExclusiveShape(*pBlueHatchActor, hatchGeo, *pDefaultMaterial);
 	m_pBlueHatch->AttachRigidActor(pBlueHatchActor);
 	m_pBlueHatch->Translate(-9.f, 17.f, 0.f);
@@ -94,6 +96,28 @@ void W2_Assignment::Initialize()
 	PxRigidActorExt::createExclusiveShape(*pRedHatchActor, hatchGeo, *pDefaultMaterial);
 	m_pRedHatch->AttachRigidActor(pRedHatchActor);
 	m_pRedHatch->Translate(9.f, 17.f, 0.f);
+
+	// Create the dummy dynamic actor
+	auto pDummyActor = pPhysX->createRigidDynamic(PxTransform{ -9.f,17.f,0.f });
+	pDummyActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	PxRigidActorExt::createExclusiveShape(*pDummyActor, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
+	m_pPhysxScene->addActor(*pDummyActor);
+
+	//*** Joint **/
+	const float lowerLimit = -PxPi / 2.f;
+	const float upperLimit = 0.f;
+	m_pBlueJoint = PxRevoluteJointCreate(*pPhysX, pDummyActor, PxTransform{ 0.f,0.f,0.f }, pBlueHatchActor,PxTransform{0.f,0.f,0.f});
+	m_pBlueJoint->setLimit(PxJointAngularLimitPair(lowerLimit, upperLimit,0.01f));
+
+	m_pBlueJoint->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
+	m_pBlueJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
+	m_pBlueJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eDRIVE_ENABLED, true);
+	
+	// Modify the local poses of the joint actors
+	PxTransform dummyLocalPose{ PxVec3{-1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
+	PxTransform hatchLocalPose{ PxVec3{0.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
+	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR0, dummyLocalPose);
+	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR1, hatchLocalPose);
 
 	//*** Triggers **/
 	XMFLOAT3 triggerSize = { 2.f,0.3f,5.f };
@@ -124,6 +148,8 @@ void W2_Assignment::Initialize()
 
 	pBlueTrShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
 	pBlueTrShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+
+
 
 	//*** Sphere **/
 	
@@ -167,7 +193,7 @@ void W2_Assignment::Initialize()
 	result = pFmod->playSound(m_pBellSound, nullptr, true, &m_pChannel2D);
 	SoundManager::GetInstance()->ErrorCheck(result);
 
-	
+
 }
 
 void W2_Assignment::Update()
@@ -207,12 +233,15 @@ void W2_Assignment::Update()
 	{
 		SoundManager::GetInstance()->GetSystem()->playSound(m_pBellSound, nullptr, false, &m_pChannel2D);
 		m_isBlueTrigger = false;
+		
 	}
 	if (m_isRedTrigger)
 	{
 		SoundManager::GetInstance()->GetSystem()->playSound(m_pBellSound, nullptr, false, &m_pChannel2D);
 		m_isRedTrigger = false;
 	}
+	
+	//m_pBlueJoint->setDriveVelocity(-2.f);
 }
 
 void W2_Assignment::Draw() const

@@ -41,4 +41,6 @@ private:
 
 	GameObject* m_pBlueHatch{ nullptr };
 	GameObject* m_pRedHatch{ nullptr };
+
+	PxRevoluteJoint* m_pBlueJoint{ nullptr };
 };
