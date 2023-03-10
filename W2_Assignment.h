@@ -36,6 +36,9 @@ private:
 	bool m_isBlueTrigger{ false };
 	bool m_isRedTrigger{ false };
 
+	bool m_shouldOpenRed{ false };
+	bool m_shouldOpenBlue{ false };
+
 	FMOD::Channel* m_pChannel2D{ nullptr };
 	FMOD::Sound* m_pBellSound{ nullptr };
 
@@ -43,4 +46,7 @@ private:
 	GameObject* m_pRedHatch{ nullptr };
 
 	PxRevoluteJoint* m_pBlueJoint{ nullptr };
+	PxRevoluteJoint* m_pRedJoint{ nullptr };
+
+	const float m_LowerHatchLimit { -PxPi / 2.f };
 };

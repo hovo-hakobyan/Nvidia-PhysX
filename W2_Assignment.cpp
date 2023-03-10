@@ -83,7 +83,6 @@ void W2_Assignment::Initialize()
 	m_pBlueHatch = new CubePosColorNorm(hatchSize.x, hatchSize.y, hatchSize.z, XMFLOAT4{ Colors::Blue });
 	AddGameObject(m_pBlueHatch);
 	auto pBlueHatchActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity });
-	//pBlueHatchActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	PxRigidActorExt::createExclusiveShape(*pBlueHatchActor, hatchGeo, *pDefaultMaterial);
 	m_pBlueHatch->AttachRigidActor(pBlueHatchActor);
 	m_pBlueHatch->Translate(-9.f, 17.f, 0.f);
@@ -92,22 +91,31 @@ void W2_Assignment::Initialize()
 	m_pRedHatch = new CubePosColorNorm(hatchSize.x, hatchSize.y, hatchSize.z, XMFLOAT4{ Colors::Red });
 	AddGameObject(m_pRedHatch);
 	auto pRedHatchActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity });
-	pRedHatchActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	PxRigidActorExt::createExclusiveShape(*pRedHatchActor, hatchGeo, *pDefaultMaterial);
 	m_pRedHatch->AttachRigidActor(pRedHatchActor);
 	m_pRedHatch->Translate(9.f, 17.f, 0.f);
 
-	// Create the dummy dynamic actor
-	auto pDummyActor = pPhysX->createRigidDynamic(PxTransform{ -9.f,17.f,0.f });
-	pDummyActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
-	PxRigidActorExt::createExclusiveShape(*pDummyActor, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
-	m_pPhysxScene->addActor(*pDummyActor);
+	
 
 	//*** Joint **/
-	const float lowerLimit = -PxPi / 2.f;
+	
 	const float upperLimit = 0.f;
-	m_pBlueJoint = PxRevoluteJointCreate(*pPhysX, pDummyActor, PxTransform{ 0.f,0.f,0.f }, pBlueHatchActor,PxTransform{0.f,0.f,0.f});
-	m_pBlueJoint->setLimit(PxJointAngularLimitPair(lowerLimit, upperLimit,0.01f));
+
+	// Dummy actor for anchoring the blue joint
+	auto pDummyActorBlue = pPhysX->createRigidDynamic(PxTransform{ -9.f,17.f,0.f });
+	pDummyActorBlue->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	PxRigidActorExt::createExclusiveShape(*pDummyActorBlue, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
+	m_pPhysxScene->addActor(*pDummyActorBlue);
+
+	//Dummy actor for anchoring the red joint
+	auto pDummyActorRed = pPhysX->createRigidDynamic(PxTransform{ 9.f,17.f,0.f });
+	pDummyActorRed->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+	PxRigidActorExt::createExclusiveShape(*pDummyActorRed, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
+	m_pPhysxScene->addActor(*pDummyActorRed);
+
+	//Blue joint
+	m_pBlueJoint = PxRevoluteJointCreate(*pPhysX, pDummyActorBlue, PxTransform{ 0.f,0.f,0.f }, pBlueHatchActor,PxTransform{0.f,0.f,0.f});
+	m_pBlueJoint->setLimit(PxJointAngularLimitPair(m_LowerHatchLimit, upperLimit,0.01f));
 
 	m_pBlueJoint->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
 	m_pBlueJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
@@ -115,9 +123,24 @@ void W2_Assignment::Initialize()
 	
 	// Modify the local poses of the joint actors
 	PxTransform dummyLocalPose{ PxVec3{-1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
-	PxTransform hatchLocalPose{ PxVec3{0.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
+	PxTransform hatchLocalPose{ PxVec3{-1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
 	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR0, dummyLocalPose);
 	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR1, hatchLocalPose);
+
+	//Red joint
+	m_pRedJoint = PxRevoluteJointCreate(*pPhysX, pDummyActorRed, PxTransform{ 0.f,0.f,0.f }, pRedHatchActor, PxTransform{ 0.f,0.f,0.f });
+	m_pRedJoint->setLimit(PxJointAngularLimitPair(m_LowerHatchLimit, upperLimit, 0.01f));
+
+	m_pRedJoint->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
+	m_pRedJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
+	m_pRedJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eDRIVE_ENABLED, true);
+
+	// Modify the local poses of the joint actors
+	PxTransform dummyLocalP{ PxVec3{1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) };
+	PxTransform hatchLocalP{ PxVec3{1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) };
+	m_pRedJoint->setLocalPose(PxJointActorIndex::eACTOR0, dummyLocalP);
+	m_pRedJoint->setLocalPose(PxJointActorIndex::eACTOR1, hatchLocalP);
+
 
 	//*** Triggers **/
 	XMFLOAT3 triggerSize = { 2.f,0.3f,5.f };
@@ -241,7 +264,26 @@ void W2_Assignment::Update()
 		m_isRedTrigger = false;
 	}
 	
-	//m_pBlueJoint->setDriveVelocity(-2.f);
+	if (m_shouldOpenRed)
+	{
+		m_pRedJoint->setDriveVelocity(-2.f);
+
+		if (m_pRedJoint->getAngle() <= m_LowerHatchLimit)
+		{
+			m_shouldOpenRed = false;
+		}
+	}
+
+	if (m_shouldOpenBlue)
+	{
+		m_pBlueJoint->setDriveVelocity(-2.f);
+
+		if (m_pBlueJoint->getAngle() <= m_LowerHatchLimit)
+		{
+			m_shouldOpenBlue = false;
+		}
+	}
+
 }
 
 void W2_Assignment::Draw() const
@@ -278,7 +320,7 @@ void W2_Assignment::onTrigger(PxTriggerPair* pairs, PxU32 count)
 				if (pOtherActor == m_pBlueBox->GetRigidActor())
 				{
 					m_isBlueTrigger = true;
-					
+					m_shouldOpenBlue = true;
 				}
 			}
 
@@ -289,6 +331,7 @@ void W2_Assignment::onTrigger(PxTriggerPair* pairs, PxU32 count)
 				if (pOtherActor == m_pRedBox->GetRigidActor())
 				{
 					m_isRedTrigger = true;
+					m_shouldOpenRed = true;
 				}
 			}
 		}
