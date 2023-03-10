@@ -18,7 +18,14 @@ protected:
 	void OnSceneActivated() override;
 	void OnSceneDeactivated() override;
 
+	virtual void onTrigger(PxTriggerPair* pairs, PxU32 count) override;
+
 private:
+	GameObject* m_pSphere;
+	PxRigidDynamic* m_pSphereActor;
 
+	PxRigidStatic* m_pTriggerActorLeft;
+	PxRigidStatic* m_pTriggerActorRight;
 
+	bool m_isRightTrigger{ false };
 };

@@ -196,6 +196,9 @@
     <ClInclude Include="PhysXMeshTestScene.h">
       <Filter>GameFiles\Scenes\W02_PhysX</Filter>
     </ClInclude>
+    <ClInclude Include="TriggerTestScene.h">
+      <Filter>GameFiles\Scenes\W02_PhysX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -325,6 +328,9 @@
       <Filter>GameFiles\Scenes\W01_PhysX</Filter>
     </ClCompile>
     <ClCompile Include="PhysXMeshTestScene.cpp">
+      <Filter>GameFiles\Scenes\W02_PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerTestScene.cpp">
       <Filter>GameFiles\Scenes\W02_PhysX</Filter>
     </ClCompile>
   </ItemGroup>
