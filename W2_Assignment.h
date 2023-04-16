@@ -30,6 +30,9 @@ private:
 	GameObject* m_pSphere;
 	PxRigidDynamic* m_pSphereActor;
 
+	GameObject* m_pLeftSphere;
+	GameObject* m_pRightSphere;
+
 	PxRigidStatic* m_pTriggerActorRed;
 	PxRigidStatic* m_pTriggerActorBlue;
 
@@ -49,4 +52,12 @@ private:
 	PxRevoluteJoint* m_pRedJoint{ nullptr };
 
 	const float m_LowerHatchLimit { -PxPi / 2.f };
+
+	XMFLOAT3 m_RedBoxStartPos{ 4.f, 7.f, 0.f };
+	XMFLOAT3 m_BlueBoxStartPos{ -4.f, 7.f, 0.f };
+	XMFLOAT3 m_SphereStartPos{ 0.f, 5.f, 0.f };
+	XMFLOAT3 m_LeftSphereStartPos{ -4.0f, 24.f, 0.f };
+	XMFLOAT3 m_RightSphereStartPos{ 4.0f, 24.0f, 0.f };
+
+	void ResetScene();
 };

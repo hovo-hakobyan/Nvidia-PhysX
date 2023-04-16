@@ -7,7 +7,8 @@
 // W01 - W02  (#define ...)
 
 //#define W01
-#define W02
+//#define W02
+#define AssignmentScenes
 
 #ifdef W01
 #include "TestScene.h"
@@ -26,6 +27,10 @@
 #include "W2_Assignment.h"
 #endif
 
+#ifdef AssignmentScenes
+#include "W1_AssignmentScene.h"
+#include "W2_Assignment.h"
+#endif
 namespace dae
 {
 	void AddScenes(SceneManager * pSceneManager)
@@ -49,7 +54,10 @@ namespace dae
 		pSceneManager->AddGameScene(new PhysXMeshTestScene());
 		
 #endif
-
+#ifdef AssignmentScenes
+		pSceneManager->AddGameScene(new W1_AssignmentScene());
+		pSceneManager->AddGameScene(new W2_Assignment());
+#endif
 	}
 }
 

@@ -56,12 +56,13 @@ void W2_Assignment::Initialize()
 
 	//Actor
 	PxRigidDynamic* pRedBoxActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity});
+	pRedBoxActor->setMass(0.1f);
 
 	//Create shape
 	PxRigidActorExt::createExclusiveShape(*pRedBoxActor, boxGeo, *pDefaultMaterial);
 	
 	m_pRedBox->AttachRigidActor(pRedBoxActor);
-	m_pRedBox->Translate(4.f, 7.f, 0.f);
+	m_pRedBox->Translate(m_RedBoxStartPos.x,m_RedBoxStartPos.y,m_RedBoxStartPos.z);
 
 	//BlueBox
 	m_pBlueBox = new CubePosColorNorm(boxSize.x, boxSize.y, boxSize.z, XMFLOAT4{ Colors::Blue });
@@ -69,12 +70,13 @@ void W2_Assignment::Initialize()
 
 	//Actor
 	PxRigidDynamic* pBlueBoxActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity });
+	pBlueBoxActor->setMass(0.1f);
 
 	//Create shape
 	PxRigidActorExt::createExclusiveShape(*pBlueBoxActor, boxGeo, *pDefaultMaterial);
 
 	m_pBlueBox->AttachRigidActor(pBlueBoxActor);
-	m_pBlueBox->Translate(-4.f, 7.f, 0.f);
+	m_pBlueBox->Translate(m_BlueBoxStartPos.x,m_BlueBoxStartPos.y,m_BlueBoxStartPos.z);
 
 	//*** Hatches **/
 	const XMFLOAT3 hatchSize{ 2.2f,0.3f,5.f };
@@ -100,21 +102,10 @@ void W2_Assignment::Initialize()
 	//*** Joint **/
 	
 	const float upperLimit = 0.f;
-
-	// Dummy actor for anchoring the blue joint
-	auto pDummyActorBlue = pPhysX->createRigidDynamic(PxTransform{ -9.f,17.f,0.f });
-	pDummyActorBlue->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
-	PxRigidActorExt::createExclusiveShape(*pDummyActorBlue, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
-	m_pPhysxScene->addActor(*pDummyActorBlue);
-
-	//Dummy actor for anchoring the red joint
-	auto pDummyActorRed = pPhysX->createRigidDynamic(PxTransform{ 9.f,17.f,0.f });
-	pDummyActorRed->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
-	PxRigidActorExt::createExclusiveShape(*pDummyActorRed, PxSphereGeometry{ 0.1f }, *pDefaultMaterial);
-	m_pPhysxScene->addActor(*pDummyActorRed);
+	
 
 	//Blue joint
-	m_pBlueJoint = PxRevoluteJointCreate(*pPhysX, pDummyActorBlue, PxTransform{ 0.f,0.f,0.f }, pBlueHatchActor,PxTransform{0.f,0.f,0.f});
+	m_pBlueJoint = PxRevoluteJointCreate(*pPhysX, nullptr, PxTransform{ PxVec3{-9.5f,17.0f ,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) }, pBlueHatchActor,PxTransform{0.f,0.f,0.f});
 	m_pBlueJoint->setLimit(PxJointAngularLimitPair(m_LowerHatchLimit, upperLimit,0.01f));
 
 	m_pBlueJoint->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
@@ -122,13 +113,13 @@ void W2_Assignment::Initialize()
 	m_pBlueJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eDRIVE_ENABLED, true);
 	
 	// Modify the local poses of the joint actors
-	PxTransform dummyLocalPose{ PxVec3{-1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
-	PxTransform hatchLocalPose{ PxVec3{-1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
-	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR0, dummyLocalPose);
+	PxTransform hatchLocalPose{ PxVec3{-0.5f,0.0f,0.f}, PxQuat(PxHalfPi, PxVec3(0, -1, 0)) };
 	m_pBlueJoint->setLocalPose(PxJointActorIndex::eACTOR1, hatchLocalPose);
+	m_pBlueJoint->setDriveVelocity(5.0f); 
+	m_pBlueJoint->setDriveForceLimit(100.0f); 
 
 	//Red joint
-	m_pRedJoint = PxRevoluteJointCreate(*pPhysX, pDummyActorRed, PxTransform{ 0.f,0.f,0.f }, pRedHatchActor, PxTransform{ 0.f,0.f,0.f });
+	m_pRedJoint = PxRevoluteJointCreate(*pPhysX, nullptr, PxTransform{ PxVec3{9.5f,17.0f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) }, pRedHatchActor, PxTransform{ 0.f,0.f,0.f });
 	m_pRedJoint->setLimit(PxJointAngularLimitPair(m_LowerHatchLimit, upperLimit, 0.01f));
 
 	m_pRedJoint->setConstraintFlag(PxConstraintFlag::eVISUALIZATION, true);
@@ -136,10 +127,10 @@ void W2_Assignment::Initialize()
 	m_pRedJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eDRIVE_ENABLED, true);
 
 	// Modify the local poses of the joint actors
-	PxTransform dummyLocalP{ PxVec3{1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) };
-	PxTransform hatchLocalP{ PxVec3{1.f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) };
-	m_pRedJoint->setLocalPose(PxJointActorIndex::eACTOR0, dummyLocalP);
+	PxTransform hatchLocalP{ PxVec3{0.5f,0.f,0.f}, PxQuat(PxHalfPi, PxVec3(0, 1, 0)) };
 	m_pRedJoint->setLocalPose(PxJointActorIndex::eACTOR1, hatchLocalP);
+	m_pRedJoint->setDriveVelocity(5.0f);
+	m_pRedJoint->setDriveForceLimit(100.0f);
 
 
 	//*** Triggers **/
@@ -174,12 +165,14 @@ void W2_Assignment::Initialize()
 
 
 
-	//*** Sphere **/
+	//*** Spheres **/
 	
 	//Sphere info
-	const float radius{ 1.f };
+	 float radius{ 1.f };
 	const int stacks{ 60 };
 	const int slices{ 60 };
+
+	//Player Sphere
 
 	//Sphere object creation
 	m_pSphere = new SpherePosColorNorm{ radius,slices,stacks,XMFLOAT4{Colors::Yellow} };
@@ -187,7 +180,7 @@ void W2_Assignment::Initialize()
 
 	//Sphere actor
 	m_pSphereActor = pPhysX->createRigidDynamic(PxTransform{ PxIdentity });
-	PxRigidBodyExt::setMassAndUpdateInertia(*m_pSphereActor, 20.f);
+
 
 	//Geometry
 	PxSphereGeometry sphereGeo = PxSphereGeometry{ radius };
@@ -196,7 +189,29 @@ void W2_Assignment::Initialize()
 	PxRigidActorExt::createExclusiveShape(*m_pSphereActor, sphereGeo, *pDefaultMaterial);
 
 	m_pSphere->AttachRigidActor(m_pSphereActor);
-	m_pSphere->Translate(0.f, 5.f, 0.f);
+	m_pSphere->Translate(m_SphereStartPos.x,m_SphereStartPos.y,m_SphereStartPos.z);
+
+	radius = 0.5f;
+	sphereGeo = PxSphereGeometry{ radius };
+	//left sphere
+	m_pLeftSphere = new SpherePosColorNorm{ radius,slices,stacks,XMFLOAT4{Colors::Blue} };
+	AddGameObject(m_pLeftSphere);
+
+	auto leftActor = pPhysX->createRigidDynamic(PxTransform{PxIdentity });
+
+	PxRigidActorExt::createExclusiveShape(*leftActor, sphereGeo, *pDefaultMaterial);
+	m_pLeftSphere->AttachRigidActor(leftActor);
+	m_pLeftSphere->Translate(m_LeftSphereStartPos.x,m_LeftSphereStartPos.y,m_LeftSphereStartPos.z);
+
+	//right sphere
+	m_pRightSphere = new SpherePosColorNorm{ radius,slices,stacks,XMFLOAT4{Colors::Red} };
+	AddGameObject(m_pRightSphere);
+
+	auto rightActor = pPhysX->createRigidDynamic(PxTransform{PxIdentity });
+
+	PxRigidActorExt::createExclusiveShape(*rightActor, sphereGeo, *pDefaultMaterial);
+	m_pRightSphere->AttachRigidActor(rightActor);
+	m_pRightSphere->Translate(m_RightSphereStartPos.x,m_RightSphereStartPos.y,m_RightSphereStartPos.z);
 
 	//*** Input **/
 	auto input = m_SceneContext.GetInput();
@@ -221,9 +236,14 @@ void W2_Assignment::Initialize()
 
 void W2_Assignment::Update()
 {
+	if (m_SceneContext.GetInput()->IsKeyboardKey(InputTriggerState::pressed, 'R'))
+	{
+		ResetScene();
+	}
+
 	const float deltaTime = m_SceneContext.GetGameTime()->GetElapsed();
 	float force{ 100000.f * deltaTime };
-	float jumpForce{ 50000.f * deltaTime };
+	float jumpForce{ 5000.f * deltaTime };
 
 	const XMFLOAT3 camForward{ m_SceneContext.GetCamera()->GetForward() };
 	const XMFLOAT3 camRight{ m_SceneContext.GetCamera()->GetRight() };
@@ -338,4 +358,28 @@ void W2_Assignment::onTrigger(PxTriggerPair* pairs, PxU32 count)
 
 		
 	}
+}
+
+void W2_Assignment::ResetScene()
+{
+	m_pRedBox->Translate(m_RedBoxStartPos.x, m_RedBoxStartPos.y, m_RedBoxStartPos.z);
+	m_pBlueBox->Translate(m_BlueBoxStartPos.x, m_BlueBoxStartPos.y, m_BlueBoxStartPos.z);
+
+	m_pSphere->Translate(m_SphereStartPos.x, m_SphereStartPos.y, m_SphereStartPos.z);
+	m_pSphere->Rotate(0.0f, 0.0f, 0.0f);
+
+	m_pLeftSphere->Translate(m_LeftSphereStartPos.x, m_LeftSphereStartPos.y, m_LeftSphereStartPos.z);
+	m_pLeftSphere->Rotate(0.0f, 0.0f, 0.0f);
+
+	m_pRightSphere->Translate(m_RightSphereStartPos.x, m_RightSphereStartPos.y, m_RightSphereStartPos.z);
+	m_pRightSphere->Rotate(0.0f, 0.0f, 0.0f);
+
+	m_isBlueTrigger = false;
+	m_isRedTrigger = false;
+	
+	m_shouldOpenBlue = false;
+	m_shouldOpenRed = false;
+
+	m_pBlueJoint->setDriveVelocity(5.0f);
+	m_pRedJoint->setDriveVelocity(5.0f);
 }
